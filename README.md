@@ -23,4 +23,20 @@ front end.
 # Technology To be Used
 1. Express.js
 2. Node.js
-3.
+
+
+# Instructions
+
+1. Make sure to download and install node.js
+2. run the following commands in your terminal.
+    1. npm init -y (adds default package.json file to your folder)
+    2. npm i express (using this to build the page)
+    3. npm i nodemon -d (used so that you don't have to restart server     everytime any changes were made)
+3. update the package.json using the code from this repos package.json
+4. create a file server.js in your app folder
+5. add the code in server.js using the code from this repo's server.js file
+
+Your app is complete. Now we just need to run the it
+1. Make sure your server is running.
+2. In the terminal run following command
+    1.  npm start (this will start the front-end of the app on localhost:3000 or different if the port is being used)
