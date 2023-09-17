@@ -21,5 +21,6 @@ system will connect to the Sakila MySQL database and provide endpoints that will
 front end.
 
 # Technology To be Used
-1. Python (Django)2
-2. SQL 
+1. Express.js
+2. Node.js
+3.
