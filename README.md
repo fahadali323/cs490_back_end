@@ -39,4 +39,4 @@ front end.
 Your app is complete. Now we just need to run the it
 1. Make sure your server is running.
 2. In the terminal run following command
-    1.  npm start (this will start the front-end of the app on localhost:3000 or different if the port is being used)
+    1.  npm run dev (this will start the front-end of the app on localhost:3000 or different if the port is being used)
