@@ -1,5 +1,5 @@
 import express from 'express';
-import { top_actor, top_movies, top_movies_description, actor_details, searchMoviesByType } from './database.js';
+import { top_actor, top_movies, top_movies_description, actor_details, searchMoviesByType, film_details } from './database.js';
 import cors from 'cors';
 
 const app = express();
@@ -49,6 +49,11 @@ app.get('/movies/search', async (req, res) => {
   }
 });
 
+app.get("/movies/:id", async(req,res)=> {
+  const id = req.params.id
+  const single_movie = await film_details(id);
+  res.send(single_movie)
+})
 
 app.listen(5001, () => {
   console.log("Server is running on port 5001");

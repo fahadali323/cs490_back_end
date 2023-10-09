@@ -153,4 +153,30 @@ export async function searchMoviesByType(type, search) {
     }
   }
   
+// get each films by its id
+export async function film_details(filmId) {
+  const [rows] = await connection.query(`
+    SELECT f.film_id,
+           f.title,
+           f.description,
+           f.release_year,
+           f.rating,
+           f.length,
+           f.special_features,
+           COUNT(r.rental_id) AS rental_count,
+           GROUP_CONCAT(DISTINCT c.name ORDER BY c.name) AS categories,
+           GROUP_CONCAT(DISTINCT a.first_name, ' ', a.last_name ORDER BY a.first_name, a.last_name) AS actors
+    FROM film f
+    INNER JOIN inventory i ON f.film_id = i.film_id
+    INNER JOIN rental r ON i.inventory_id = r.inventory_id
+    LEFT JOIN film_category fc ON f.film_id = fc.film_id
+    LEFT JOIN category c ON fc.category_id = c.category_id
+    INNER JOIN film_actor fa ON f.film_id = fa.film_id
+    INNER JOIN actor a ON fa.actor_id = a.actor_id
+    WHERE f.film_id = ?
+    GROUP BY f.film_id
+  `, [filmId]);
+
+  return rows;
+}
 
