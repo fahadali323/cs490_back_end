@@ -104,3 +104,53 @@ export async function actor_details(id) {
 
 // const act_details = await actor_details(23);
 // console.log(act_details)
+
+export async function searchMoviesByType(type, search) {
+    let queryStr;
+    const searchValue = `%${search}%`;
+  
+    try {
+      if (type === 'film') {
+        queryStr = `
+          SELECT film.*, GROUP_CONCAT(DISTINCT actor.first_name, ' ', actor.last_name) AS actors, GROUP_CONCAT(DISTINCT category.name) AS genres
+          FROM film
+          LEFT JOIN film_actor ON film.film_id = film_actor.film_id
+          LEFT JOIN actor ON film_actor.actor_id = actor.actor_id
+          LEFT JOIN film_category ON film.film_id = film_category.film_id
+          LEFT JOIN category ON film_category.category_id = category.category_id
+          WHERE film.title LIKE ?
+          GROUP BY film.film_id
+        `;
+      } else if (type === 'actor') {
+        queryStr = `
+          SELECT film.*, GROUP_CONCAT(DISTINCT actor.first_name, ' ', actor.last_name) AS actors, GROUP_CONCAT(DISTINCT category.name) AS genres
+          FROM film
+          LEFT JOIN film_actor ON film.film_id = film_actor.film_id
+          LEFT JOIN actor ON film_actor.actor_id = actor.actor_id
+          LEFT JOIN film_category ON film.film_id = film_category.film_id
+          LEFT JOIN category ON film_category.category_id = category.category_id
+          WHERE actor.first_name LIKE ? OR actor.last_name LIKE ?
+          GROUP BY film.film_id
+        `;
+      } else if (type === 'genre') {
+        queryStr = `
+          SELECT film.*, GROUP_CONCAT(DISTINCT actor.first_name, ' ', actor.last_name) AS actors, GROUP_CONCAT(DISTINCT category.name) AS genres
+          FROM film
+          LEFT JOIN film_actor ON film.film_id = film_actor.film_id
+          LEFT JOIN actor ON film_actor.actor_id = actor.actor_id
+          LEFT JOIN film_category ON film.film_id = film_category.film_id
+          LEFT JOIN category ON film_category.category_id = category.category_id
+          WHERE category.name LIKE ?
+          GROUP BY film.film_id
+        `;
+      }
+  
+      const [rows] = await connection.query(queryStr, [searchValue, searchValue]);
+      return rows;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  
+

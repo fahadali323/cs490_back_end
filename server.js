@@ -1,5 +1,5 @@
 import express from 'express';
-import { top_actor, top_movies, top_movies_description, actor_details } from './database.js';
+import { top_actor, top_movies, top_movies_description, actor_details, searchMoviesByType } from './database.js';
 import cors from 'cors';
 
 const app = express();
@@ -24,16 +24,31 @@ app.get("/top_actors", async ( req, res) => {
   res.send(actors);
 })
 
-// app.get("/actor_details", async(req,res)=> {
-//   const details = await actor_details();
-//   res.send(details)
-// })
-
 app.get("/actor_details/:id", async(req,res)=> {
   const id = req.params.id
   const single_actor = await actor_details(id);
   res.send(single_actor)
 })
+
+
+app.get('/movies/search', async (req, res) => {
+  const type = req.query.type || ''; // Get the type from the query parameters
+  const search = req.query.search || ''; // Get the search term from the query parameters
+
+  try {
+    const movies = await searchMoviesByType(type, search);
+
+    if (movies.length === 0) {
+      return res.status(404).json({ message: 'No results found.' });
+    }
+
+    return res.json(movies);
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    return res.status(500).json({ error: 'Database error' });
+  }
+});
+
 
 app.listen(5001, () => {
   console.log("Server is running on port 5001");
