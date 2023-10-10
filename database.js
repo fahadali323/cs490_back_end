@@ -180,3 +180,15 @@ export async function film_details(filmId) {
   return rows;
 }
 
+
+///display all customers 
+
+export async function viewAllCustomers() {
+  try {
+    const [rows] = await connection.query(`SELECT * from customer`);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
