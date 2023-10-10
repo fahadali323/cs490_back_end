@@ -57,16 +57,7 @@ app.get("/movies/:id", async(req,res)=> {
   res.send(single_movie)
 })
 
-//customer's page logic 
-app.get('/customers', async (req, res) => {
-  try {
-    const customers = await viewAllCustomers();
-    res.json(customers);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+// customer's page logic 
 app.get('/customers/search', async (req, res) => {
   try {
     const { customerId, firstName, lastName } = req.query;
