@@ -1,7 +1,7 @@
 import express from 'express';
 import { top_actor, top_movies, top_movies_description, actor_details, 
          searchMoviesByType, film_details, 
-         viewAllCustomers } from './database.js';
+         searchCustomers } from './database.js';
 import cors from 'cors';
 
 const app = express();
@@ -67,7 +67,21 @@ app.get('/customers', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+app.get('/customers/search', async (req, res) => {
+  try {
+    const { customerId, firstName, lastName } = req.query;
+    const customers = await searchCustomers(customerId, firstName, lastName);
+    
+    if (customers.length === 0) {
+      return res.status(404).json({ message: 'No results found.' });
+    }
 
+    return res.json(customers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 app.listen(5001, () => {

@@ -181,11 +181,24 @@ export async function film_details(filmId) {
 }
 
 
-///display all customers 
-
-export async function viewAllCustomers() {
+///display all customers based on id, first or last name
+export async function searchCustomers(customerId, firstName, lastName) {
   try {
-    const [rows] = await connection.query(`SELECT * from customer`);
+    let query = 'SELECT * FROM customer WHERE 1';
+
+    if (customerId) {
+      query += ` AND customer_id = ${customerId}`;
+    }
+
+    if (firstName) {
+      query += ` AND first_name LIKE '%${firstName}%'`;
+    }
+
+    if (lastName) {
+      query += ` AND last_name LIKE '%${lastName}%'`;
+    }
+
+    const [rows] = await connection.query(query);
     return rows;
   } catch (error) {
     console.error(error);
