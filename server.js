@@ -2,7 +2,8 @@ import express from 'express';
 import { top_actor, top_movies, top_movies_description, actor_details, 
          searchMoviesByType, film_details, 
          searchCustomers,
-         addCustomer } from './database.js';
+         addCustomer,
+         updateCustomer } from './database.js';
 import cors from 'cors';
 
 const app = express();
@@ -103,6 +104,31 @@ app.post('/customers/add', async (req, res) => {
       res.status(201).json({ message: 'Customer added successfully', insertedRows: result.affectedRows });
     } else {
       res.status(400).json({ error: 'Failed to add customer' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+///update customer details
+app.put('/customers/update', async (req, res) => {
+  try {
+    const {
+      customer_id,
+      store_id,
+      first_name,
+      last_name,
+      email,
+      address_id,
+      active,
+    } = req.body;
+
+    const result = await updateCustomer(customer_id, store_id, first_name, last_name, email, address_id, active);
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'Customer updated successfully', updatedRows: result.affectedRows });
+    } else {
+      res.status(400).json({ error: 'Failed to update customer' });
     }
   } catch (error) {
     console.error(error);

@@ -230,5 +230,20 @@ export async function addCustomer(newCustomer) {
     throw error;
   }
 }
+//update customer details
+export async function updateCustomer(customer_id, store_id, first_name, last_name, email, address_id, active) {
+  try {
+    const query = `
+      UPDATE customer
+      SET store_id = ?, first_name = ?, last_name = ?, email = ?, address_id = ?, active = ?
+      WHERE customer_id = ?;
+    `;
 
+    const [rows] = await connection.query(query, [store_id, first_name, last_name, email, address_id, active, customer_id]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
 
