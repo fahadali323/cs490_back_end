@@ -3,7 +3,8 @@ import { top_actor, top_movies, top_movies_description, actor_details,
          searchMoviesByType, film_details, 
          searchCustomers,
          addCustomer,
-         updateCustomer } from './database.js';
+         updateCustomer, 
+         deleteCustomer } from './database.js';
 import cors from 'cors';
 
 const app = express();
@@ -135,6 +136,30 @@ app.put('/customers/update', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+//delete a customer based on it's id 
+app.delete('/customers/delete', async (req,res) => {
+  try {
+    const customer_id = req.body.customer_id; // Assuming you are sending the customer_id in the request body
+    if (!customer_id) {
+      return res.status(400).json({ error: 'customer_id is required' });
+    }
+
+    // Call the deleteCustomer function to delete the customer
+    const result = await deleteCustomer(customer_id);
+
+    if (result.affectedRows > 0) {
+      return res.status(200).json({ message: 'Customer deleted successfully' });
+    } else {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 app.listen(5001, () => {
   console.log("Server is running on port 5001");

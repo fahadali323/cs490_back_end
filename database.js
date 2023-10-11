@@ -230,7 +230,7 @@ export async function addCustomer(newCustomer) {
     throw error;
   }
 }
-//update customer details
+//update customer's details
 export async function updateCustomer(customer_id, store_id, first_name, last_name, email, address_id, active) {
   try {
     const query = `
@@ -247,3 +247,14 @@ export async function updateCustomer(customer_id, store_id, first_name, last_nam
   }
 }
 
+//delete customer's details and data
+export async function deleteCustomer(customer_id)  {
+  try {
+    const query = `DELETE from customer where customer_id= ?`;
+    const [rows] = await connection.query(query, [customer_id]); 
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
