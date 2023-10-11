@@ -248,13 +248,21 @@ export async function updateCustomer(customer_id, store_id, first_name, last_nam
 }
 
 //delete customer's details and data
-export async function deleteCustomer(customer_id)  {
+// export async function deleteCustomer(customer_id)  {
+//   try {
+//     const query = `DELETE from customer where customer_id= ?`;
+//     const [rows] = await connection.query(query, [customer_id]); 
+//     return rows;
+//   } catch (error) {
+//     console.error(error);
+//     throw error;
+//   }
+// }
+export async function deleteCustomer(customerId) {
   try {
-    const query = `DELETE from customer where customer_id= ?`;
-    const [rows] = await connection.query(query, [customer_id]); 
-    return rows;
+    const [result] = await connection.execute('DELETE FROM customer WHERE customer_id = ?', [customerId]);
+    return result;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 }
