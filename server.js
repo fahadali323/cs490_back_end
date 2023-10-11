@@ -1,13 +1,16 @@
 import express from 'express';
 import { top_actor, top_movies, top_movies_description, actor_details, 
          searchMoviesByType, film_details, 
-         searchCustomers } from './database.js';
+         searchCustomers,
+         addCustomer } from './database.js';
 import cors from 'cors';
 
 const app = express();
 
 // Use the cors middleware
 app.use(cors());
+
+app.use(express.json());
 
 
 app.get("/top_movies", async (req, res) => {
@@ -73,7 +76,39 @@ app.get('/customers/search', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+///adding customers route
+app.post('/customers/add', async (req, res) => {
+  try {
+    const {
+      store_id,
+      first_name,
+      last_name,
+      email,
+      address_id,
+      active,
+    } = req.body;
 
+    const newCustomer = {
+      store_id,
+      first_name,
+      last_name,
+      email,
+      address_id,
+      active,
+    };
+
+    const result = await addCustomer(newCustomer);
+
+    if (result.affectedRows > 0) {
+      res.status(201).json({ message: 'Customer added successfully', insertedRows: result.affectedRows });
+    } else {
+      res.status(400).json({ error: 'Failed to add customer' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.listen(5001, () => {
   console.log("Server is running on port 5001");

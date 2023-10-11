@@ -205,3 +205,30 @@ export async function searchCustomers(customerId, firstName, lastName) {
     throw error;
   }
 }
+
+///adding a new customer
+export async function addCustomer(newCustomer) {
+  try {
+    const {
+      store_id,
+      first_name,
+      last_name,
+      email,
+      address_id,
+      active,
+    } = newCustomer;
+
+    const query = `
+      INSERT INTO customer (store_id, first_name, last_name, email, address_id, active, create_date)
+      VALUES (?, ?, ?, ?, ?, ?, NOW());
+    `;
+
+    const [rows] = await connection.query(query, [store_id, first_name, last_name, email, address_id, active]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+
