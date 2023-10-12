@@ -3,28 +3,28 @@ import dotevn from 'dotenv'; dotevn.config()
 
 
 const connection = mysql2.createPool({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE,
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
 }).promise()
 
 export async function top_movies() {
-    const [rows] = await connection.query(`SELECT f.title, COUNT(*) AS rental_count
+  const [rows] = await connection.query(`SELECT f.title, COUNT(*) AS rental_count
                     FROM rental r
                     JOIN inventory i ON r.inventory_id = i.inventory_id
                     JOIN film f ON i.film_id = f.film_id
                     GROUP BY f.title
                     ORDER BY rental_count DESC
                     LIMIT 5;`)
-    return rows
+  return rows
 }
 
 // const movies = await top_movies()
 // console.log(movies);
 
 export async function top_movies_description() {
-    const [rows] = await connection.query(`WITH TopMovies AS (
+  const [rows] = await connection.query(`WITH TopMovies AS (
         SELECT f.title
         FROM rental r
         JOIN inventory i ON r.inventory_id = i.inventory_id
@@ -41,7 +41,7 @@ export async function top_movies_description() {
     GROUP BY f.title, f.description, f.release_year, f.rating, f.special_features
     ORDER BY rental_count DESC;
     `)
-    return rows
+  return rows
 }
 
 // const movies_description = await top_movies_description()
@@ -49,7 +49,7 @@ export async function top_movies_description() {
 
 
 export async function top_actor() {
-    const [rows] = await connection.query(`SELECT actor.actor_id,
+  const [rows] = await connection.query(`SELECT actor.actor_id,
     actor.first_name,
     actor.last_name,
     COUNT(film_actor.film_id) AS film_count
@@ -59,7 +59,7 @@ export async function top_actor() {
     ORDER BY film_count DESC
     LIMIT 5;
     `)
-    return rows
+  return rows
 }
 
 
@@ -67,7 +67,7 @@ export async function top_actor() {
 // console.log(actor);
 
 export async function actor_details(id) {
-    const [rows] = await connection.query(`SELECT a.actor_id,
+  const [rows] = await connection.query(`SELECT a.actor_id,
     a.first_name,
     a.last_name,
     r.film_id,
@@ -99,19 +99,19 @@ export async function actor_details(id) {
     INNER JOIN film f ON r.film_id = f.film_id
     WHERE r.rn <= 5
     ORDER BY a.actor_id, r.rental_count DESC`, [id, id])
-    return rows
+  return rows
 }
 
 // const act_details = await actor_details(23);
 // console.log(act_details)
 
 export async function searchMoviesByType(type, search) {
-    let queryStr;
-    const searchValue = `%${search}%`;
-  
-    try {
-      if (type === 'film') {
-        queryStr = `
+  let queryStr;
+  const searchValue = `%${search}%`;
+
+  try {
+    if (type === 'film') {
+      queryStr = `
           SELECT film.*, GROUP_CONCAT(DISTINCT actor.first_name, ' ', actor.last_name) AS actors, GROUP_CONCAT(DISTINCT category.name) AS genres
           FROM film
           LEFT JOIN film_actor ON film.film_id = film_actor.film_id
@@ -121,8 +121,8 @@ export async function searchMoviesByType(type, search) {
           WHERE film.title LIKE ?
           GROUP BY film.film_id
         `;
-      } else if (type === 'actor') {
-        queryStr = `
+    } else if (type === 'actor') {
+      queryStr = `
           SELECT film.*, GROUP_CONCAT(DISTINCT actor.first_name, ' ', actor.last_name) AS actors, GROUP_CONCAT(DISTINCT category.name) AS genres
           FROM film
           LEFT JOIN film_actor ON film.film_id = film_actor.film_id
@@ -132,8 +132,8 @@ export async function searchMoviesByType(type, search) {
           WHERE actor.first_name LIKE ? OR actor.last_name LIKE ?
           GROUP BY film.film_id
         `;
-      } else if (type === 'genre') {
-        queryStr = `
+    } else if (type === 'genre') {
+      queryStr = `
           SELECT film.*, GROUP_CONCAT(DISTINCT actor.first_name, ' ', actor.last_name) AS actors, GROUP_CONCAT(DISTINCT category.name) AS genres
           FROM film
           LEFT JOIN film_actor ON film.film_id = film_actor.film_id
@@ -143,16 +143,16 @@ export async function searchMoviesByType(type, search) {
           WHERE category.name LIKE ?
           GROUP BY film.film_id
         `;
-      }
-  
-      const [rows] = await connection.query(queryStr, [searchValue, searchValue]);
-      return rows;
-    } catch (error) {
-      console.error(error);
-      throw error;
     }
+
+    const [rows] = await connection.query(queryStr, [searchValue, searchValue]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-  
+}
+
 // get each films by its id
 export async function film_details(filmId) {
   const [rows] = await connection.query(`
@@ -248,20 +248,31 @@ export async function updateCustomer(customer_id, store_id, first_name, last_nam
 }
 
 //delete customer's details and data
-// export async function deleteCustomer(customer_id)  {
-//   try {
-//     const query = `DELETE from customer where customer_id= ?`;
-//     const [rows] = await connection.query(query, [customer_id]); 
-//     return rows;
-//   } catch (error) {
-//     console.error(error);
-//     throw error;
-//   }
-// }
 export async function deleteCustomer(customerId) {
   try {
-    const [result] = await connection.execute('DELETE FROM customer WHERE customer_id = ?', [customerId]);
-    return result;
+    const [rows] = await connection.execute('DELETE FROM customer WHERE customer_id = ?', [customerId]);
+    return rows;
+  } catch (error) {
+    throw error;
+  }
+}
+//view customer's rented movies
+export async function viewCustomerMovies(customerId) {
+  try {
+    const [rows] = await connection.execute(`
+    SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    f.title AS movie_title,
+    r.rental_date,
+    r.return_date
+    FROM customer c
+    JOIN rental r ON c.customer_id = r.customer_id
+    JOIN inventory i ON r.inventory_id = i.inventory_id
+    JOIN film f ON i.film_id = f.film_id
+    WHERE c.customer_id = ?`, [customerId]);
+    return rows;
   } catch (error) {
     throw error;
   }
