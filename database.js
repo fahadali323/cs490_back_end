@@ -277,3 +277,34 @@ export async function viewCustomerMovies(customerId) {
     throw error;
   }
 }
+////
+
+
+export async function createRental(customer_id, film_id, staff_id) {
+  try {
+    // Check if the customer and film exist in the database
+    const [customer] = await connection.query('SELECT * FROM customer WHERE customer_id = ?', [customer_id]);
+    const [film] = await connection.query('SELECT * FROM film WHERE film_id = ?', [film_id]);
+
+    if (customer.length === 0 || film.length === 0) {
+      return { success: false, message: 'Customer or film not found' };
+    }
+
+    // Create a new rental record with staff_id
+    const [rentalResult] = await connection.query(
+      'INSERT INTO rental (customer_id, inventory_id, rental_date, return_date, staff_id) VALUES (?, ?, NOW(), NULL, ?)',
+      [customer_id, film_id, staff_id] // You can set a default staff ID here or provide it as needed
+    );
+
+
+    // Check if the rental was successfully created
+    if (rentalResult.affectedRows > 0) {
+      return { success: true, message: 'Film rented successfully' };
+    } else {
+      return { success: false, message: 'Failed to rent the film' };
+    }
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: 'Internal Server Error' };
+  }
+}

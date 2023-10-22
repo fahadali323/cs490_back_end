@@ -5,7 +5,8 @@ import { top_actor, top_movies, top_movies_description, actor_details,
          addCustomer,
          updateCustomer, 
          deleteCustomer,
-         viewCustomerMovies, } from './database.js';
+         viewCustomerMovies,
+         createRental } from './database.js';
 import cors from 'cors';
 
 const app = express();
@@ -167,6 +168,27 @@ app.get('/customers/:id', async (req, res) => {
     return res.send(customer_rented_movies);
   } catch (error) {
     return res.status(500).json({ error: 'An error occurred while fetching customer data.' });
+  }
+});
+// Rent a film to a customer
+app.post('/movies/rent', async (req, res) => {
+  try {
+    const { customer_id, film_id, staff_id } = req.body;
+
+    if (!customer_id || !film_id) {
+      return res.status(400).json({ error: 'Both customer_id and film_id are required.' });
+    }
+
+    const rentalResult = await createRental(customer_id, film_id, staff_id); // Pass staff_id if available
+
+    if (rentalResult.success) {
+      res.status(201).json({ message: rentalResult.message });
+    } else {
+      res.status(400).json({ error: rentalResult.message });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
