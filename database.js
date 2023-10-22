@@ -279,7 +279,6 @@ export async function viewCustomerMovies(customerId) {
 }
 ////
 
-
 export async function createRental(customer_id, film_id, staff_id) {
   try {
     // Check if the customer and film exist in the database
@@ -290,12 +289,26 @@ export async function createRental(customer_id, film_id, staff_id) {
       return { success: false, message: 'Customer or film not found' };
     }
 
-    // Create a new rental record with staff_id
-    const [rentalResult] = await connection.query(
-      'INSERT INTO rental (customer_id, inventory_id, rental_date, return_date, staff_id) VALUES (?, ?, NOW(), NULL, ?)',
-      [customer_id, film_id, staff_id] // You can set a default staff ID here or provide it as needed
+    // Check if the film is available for rent by verifying it's in the inventory
+    const [inventory] = await connection.query(
+      'SELECT inventory_id FROM inventory WHERE film_id = ?',
+      [film_id]
     );
 
+    // Filter the available inventory that is not associated with any rental
+    const availableInventory = inventory.filter(inventoryItem => {
+      return !rentalExistsForInventory(inventoryItem.inventory_id);
+    });
+
+    if (availableInventory.length === 0) {
+      return { success: false, message: 'Film is not available for rent' };
+    }
+
+    // Create a new rental record with staff_id
+    const [rentalResult] = await connection.query(
+      'INSERT INTO rental (customer_id, inventory_id, rental_date, staff_id) VALUES (?, ?, NOW(), ?)',
+      [customer_id, availableInventory[0].inventory_id, staff_id]
+    );
 
     // Check if the rental was successfully created
     if (rentalResult.affectedRows > 0) {
@@ -308,3 +321,13 @@ export async function createRental(customer_id, film_id, staff_id) {
     return { success: false, message: 'Internal Server Error' };
   }
 }
+
+// Helper function to check if a rental already exists for a given inventory_id
+async function rentalExistsForInventory(inventory_id) {
+  const [existingRental] = await connection.query(
+    'SELECT rental_id FROM rental WHERE inventory_id = ?',
+    [inventory_id]
+  );
+  return existingRental.length > 0;
+}
+
