@@ -277,8 +277,7 @@ export async function viewCustomerMovies(customerId) {
     throw error;
   }
 }
-////
-
+/// rent a movie
 export async function createRental(customer_id, film_id, staff_id) {
   try {
     // Check if the customer and film exist in the database
@@ -331,3 +330,23 @@ async function rentalExistsForInventory(inventory_id) {
   return existingRental.length > 0;
 }
 
+//to generate a pdf of customers that rented a movie
+export async function fetchCustomerData() {
+    const [queryResult] = await connection.query(`
+    SELECT DISTINCT
+    customer.customer_id,
+    customer.first_name,
+    customer.last_name,
+    customer.email,
+    film.title AS rented_movie
+FROM
+    customer
+    JOIN rental ON customer.customer_id = rental.customer_id
+    JOIN inventory ON rental.inventory_id = inventory.inventory_id
+    JOIN film ON inventory.film_id = film.film_id;
+
+    `);
+  return queryResult
+}
+// const data = await fetchCustomerData();
+// console.log(data);

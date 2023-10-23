@@ -1,12 +1,16 @@
 import express from 'express';
-import { top_actor, top_movies, top_movies_description, actor_details, 
-         searchMoviesByType, film_details, 
-         searchCustomers,
-         addCustomer,
-         updateCustomer, 
-         deleteCustomer,
-         viewCustomerMovies,
-         createRental } from './database.js';
+import {
+  top_actor, top_movies, top_movies_description, actor_details,
+  searchMoviesByType, film_details,
+  searchCustomers,
+  addCustomer,
+  updateCustomer,
+  deleteCustomer,
+  viewCustomerMovies,
+  createRental,
+  fetchCustomerData
+} from './database.js';
+
 import cors from 'cors';
 
 const app = express();
@@ -22,18 +26,18 @@ app.get("/top_movies", async (req, res) => {
   res.send(movies);
 });
 
-app.get("/movies_description", async( req,res)=> {
+app.get("/movies_description", async (req, res) => {
   const description = await top_movies_description();
   res.send(description);
 })
 
 
-app.get("/top_actors", async ( req, res) => {
+app.get("/top_actors", async (req, res) => {
   const actors = await top_actor();
   res.send(actors);
 })
 
-app.get("/actor_details/:id", async(req,res)=> {
+app.get("/actor_details/:id", async (req, res) => {
   const id = req.params.id
   const single_actor = await actor_details(id);
   res.send(single_actor)
@@ -58,7 +62,7 @@ app.get('/movies/search', async (req, res) => {
   }
 });
 
-app.get("/movies/:id", async(req,res)=> {
+app.get("/movies/:id", async (req, res) => {
   const id = req.params.id
   const single_movie = await film_details(id);
   res.send(single_movie)
@@ -69,7 +73,7 @@ app.get('/customers/search', async (req, res) => {
   try {
     const { customerId, firstName, lastName } = req.query;
     const customers = await searchCustomers(customerId, firstName, lastName);
-    
+
     if (customers.length === 0) {
       return res.status(404).json({ message: 'No results found.' });
     }
@@ -191,6 +195,14 @@ app.post('/movies/rent', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+//generate
+
+app.get("/customer-rents", async (req, res) => {
+  const data = await fetchCustomerData();
+  res.json(data);
+});
+
+
 
 app.listen(5001, () => {
   console.log("Server is running on port 5001");
